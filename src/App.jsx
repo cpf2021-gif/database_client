@@ -1,12 +1,15 @@
-import './App.css'
+import useLocalStorage from "./hook/useLocalStorage";
+import { Login } from "./page/Login";
+import { Home } from "./page/Home";
 
 function App() {
+  const [user, setuser] = useLocalStorage("msg", {});
 
-  return (
-    <div>
-      <h1>Inventory management system</h1>
-    </div>
-  )
+  if (user.username && user.role) {
+    return <Home user={user} setuser={setuser} />;
+  }
+
+  return <Login setuser={setuser} />;
 }
 
-export default App
+export default App;
