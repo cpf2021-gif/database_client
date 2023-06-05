@@ -1,6 +1,7 @@
 import { Button, Form, message, Select, Divider, Input } from "antd";
 import { handleExport } from "../../utils/educe";
 import { useGetProductsQuery } from "../../feature/api/apiSlice";
+import formateDate from "../../utils/formatDate"
 
 const inventoriesColumns = [
   {
@@ -107,7 +108,9 @@ export const ExportForm = () => {
         });
         const res = await resp.json();
         const data = res.data;
-        handleExport({ columns: OrderColumns, data, name: "入库数据" });
+        // 文件名包含时间 "yyyy-MM"
+        const name = "入库数据" + (values.month ? values.month : formateDate(Date.now()).substring(0, 7));
+        handleExport({ columns: OrderColumns, data, name: name });
       } else {
         const resp = await fetch("http://localhost:8080/outbounds/export", {
           method: "PUT",
@@ -121,7 +124,9 @@ export const ExportForm = () => {
         });
         const res = await resp.json();
         const data = res.data;
-        handleExport({ columns: OrderColumns, data, name: "出库数据" });
+        // 文件名包含时间 "yyyy-MM"
+        const name = "出库数据" + (values.month ? values.month : formateDate(Date.now()).substring(0, 7));
+        handleExport({ columns: OrderColumns, data, name: name });
       }
     } catch (err) {
       errorM("没有数据");
@@ -139,7 +144,9 @@ export const ExportForm = () => {
       });
       const res = await resp.json();
       const data = res.data;
-      handleExport({ columns: inventoriesColumns, data, name: "库存数据" });
+      // 文件名包含时间 "yyyy-MM-dd"
+      const name = "库存数据"+ formateDate(Date.now());
+      handleExport({ columns: inventoriesColumns, data, name: name });
     } catch (err) {
       message.error("导出失败");
     }
