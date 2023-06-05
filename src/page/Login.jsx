@@ -32,7 +32,6 @@ export const Login = ({ setuser }) => {
     });
 
     let data = await rep.json();
-    console.log(data);
 
     if (rep.status !== 200) {
       error();
