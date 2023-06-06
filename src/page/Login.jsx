@@ -45,6 +45,14 @@ export const Login = ({ setuser }) => {
     }, 1000);
   };
 
+  // 输入校验
+  const vaildateString = (_, value) => {
+    if (!value || value.length < 2 || value.length > 15) {
+      return Promise.reject(new Error("长度为2-15位"));
+    }
+    return Promise.resolve();
+  };
+
   return (
     <div className=" flex justify-center items-center flex-col bg-slate-300 h-screen">
       {contextHolder}
@@ -76,6 +84,9 @@ export const Login = ({ setuser }) => {
                 required: true,
                 message: "Please input your username!",
               },
+              {
+                validator: vaildateString,
+              }
             ]}
           >
             <Input />
@@ -89,6 +100,9 @@ export const Login = ({ setuser }) => {
                 required: true,
                 message: "Please input your password!",
               },
+              {
+                validator: vaildateString,
+              }
             ]}
           >
             <Input.Password />
