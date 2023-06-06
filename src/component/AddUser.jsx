@@ -1,10 +1,20 @@
 import { Button, Form, Input, message, Select } from "antd";
-import { useAddUserMutation } from "../../feature/api/apiSlice";
+import {
+  useAddUserMutation,
+  useGetUsersQuery,
+  useEditPasswordMutation,
+} from "../../feature/api/apiSlice";
+import { Divider } from "antd";
 
-export const AddUser = () => {
+export const AddUser = ({ user, setuser }) => {
+  console.log(user);
+
   const [form] = Form.useForm();
+  const [form2] = Form.useForm();
   const [addUser, { isLoading }] = useAddUserMutation();
+  const [editPassword, { isLoading2 }] = useEditPasswordMutation();
   const [messageApi, contextHolder] = message.useMessage();
+  const { data: users = {}, isSuccess } = useGetUsersQuery();
   const { Option } = Select;
 
   // 成功提示
@@ -25,14 +35,32 @@ export const AddUser = () => {
     });
   };
 
+  // 添加用户
   const onFinish = async (values) => {
     try {
       const resp = await addUser(values).unwrap();
       success(resp.message);
     } catch (err) {
-        error(err.data.error);
+      error(err.data.error);
     }
     form.resetFields();
+  };
+
+  // 修改密码
+  const onFinish2 = async (values) => {
+    try {
+      const resp = await editPassword(values).unwrap();
+      success(resp.message);
+      setTimeout(() => {
+        // 如果修改的是当前用户的密码，就清空当前用户, 退出登录
+        if (user.username === values.username) {
+          setuser({});
+        }
+      }, 2000);
+    } catch (err) {
+      error(err.data.error);
+    }
+    form2.resetFields();
   };
 
   // 电话号码校验
@@ -63,6 +91,10 @@ export const AddUser = () => {
     return Promise.resolve();
   };
 
+  if (!isSuccess) {
+    return <div>loading...</div>;
+  }
+
   return (
     <div>
       <h2>添加用户</h2>
@@ -91,8 +123,8 @@ export const AddUser = () => {
               message: "请输入用户名!",
             },
             {
-                validator: vaildatename,
-            }
+              validator: vaildatename,
+            },
           ]}
         >
           <Input />
@@ -108,7 +140,7 @@ export const AddUser = () => {
             },
             {
               validator: vaildatePassword,
-            }
+            },
           ]}
         >
           <Input.Password />
@@ -157,8 +189,8 @@ export const AddUser = () => {
               message: "请输入联系电话!",
             },
             {
-                validator: vaildatePhone,
-            }
+              validator: vaildatePhone,
+            },
           ]}
         >
           <Input />
@@ -170,7 +202,75 @@ export const AddUser = () => {
             span: 16,
           }}
         >
-          <Button type="primary" disabled={isLoading} htmlType="submit">
+          <Button
+            type="primary"
+            disabled={isLoading || user.role != "admin"}
+            htmlType="submit"
+          >
+            Submit
+          </Button>
+        </Form.Item>
+      </Form>
+      <Divider />
+      <h2>修改密码</h2>
+      <Form
+        form={form2}
+        name="password"
+        labelCol={{
+          span: 8,
+        }}
+        wrapperCol={{
+          span: 16,
+        }}
+        style={{
+          maxWidth: 600,
+        }}
+        onFinish={onFinish2}
+      >
+        <Form.Item
+          label="用户名"
+          name="username"
+          rules={[
+            {
+              required: true,
+              message: "请输入用户名!",
+            },
+          ]}
+        >
+          <Select>
+            {user.role == "admin" ? (
+              users.data.map((user) => (
+                <Option value={user.username}>{user.username}</Option>
+              ))
+            ) : (
+              <Option value={user.username}>{user.username}</Option>
+            )}
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          label="密码"
+          name="password"
+          rules={[
+            {
+              required: true,
+              message: "请输入密码!",
+            },
+            {
+              validator: vaildatePassword,
+            },
+          ]}
+        >
+          <Input.Password />
+        </Form.Item>
+
+        <Form.Item
+          wrapperCol={{
+            offset: 8,
+            span: 16,
+          }}
+        >
+          <Button type="primary" disabled={isLoading2} htmlType="submit">
             Submit
           </Button>
         </Form.Item>

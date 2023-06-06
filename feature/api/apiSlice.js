@@ -28,6 +28,14 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+    editPassword: builder.mutation({
+      query: ({ username, password }) => ({
+        url: `/users/password/${username}`,
+        method: "PATCH",
+        body: { password: password },
+      }),
+      invalidatesTags: ["User"],
+    }),
     deteleUser: builder.mutation({
       query: (username) => ({
         url: `/users/${username}`,
@@ -126,17 +134,21 @@ export const apiSlice = createApi({
 
 export const { 
   useGetDashboardQuery,
+
   useGetUsersQuery,
   useGetUserQuery,
   useEditUserMutation, 
+  useEditPasswordMutation,
   useDeteleUserMutation,
   useAddUserMutation,
+
   useGetProductsQuery,
   useGetSuppliersQuery,
   useAddProductMutation,
   useAddSupplierMutation,
   useEditProductMutation,
   useDeleteProductMutation,
+
   useGetInventoriesQuery,
   useGetInboundsQuery,
   useEditInventoryMutation,

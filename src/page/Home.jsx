@@ -136,7 +136,7 @@ export const Home = ({ user, setuser }) => {
                 setMsg(<User />);
                 break;
               case "1-3":
-                setMsg(<AddUser />);
+                setMsg(<AddUser user={user} setuser={setuser}/>);
                 break;
               case "2-1":
                 setMsg(<Product />);
