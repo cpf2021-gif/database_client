@@ -71,11 +71,11 @@ export const Inventory = () => {
   const onpeNotification = (inventories) => {
     inventories.map((inventory) => {
       if (inventory.quantity < inventory.min_quantity) {
-        notificationApi.open({
+        notificationApi.warning({
           message: "库存过低",
           description: `${inventory.product_name} 库存过低`,
           duration: 0,
-          placement: "TopRight",
+          placement: "topRightt",
         });
       }
       if (
@@ -83,10 +83,10 @@ export const Inventory = () => {
         inventory.max_quantity / 10
       ) {
         notificationApi.open({
-          message: "库存过高",
+          message: "warning",
           description: `${inventory.product_name} 库存过高`,
           duration: 0,
-          placement: "TopRight",
+          placement: "topRight",
         });
       }
     });
