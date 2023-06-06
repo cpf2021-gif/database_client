@@ -75,7 +75,7 @@ export const Inventory = () => {
           message: "库存过低",
           description: `${inventory.product_name} 库存过低`,
           duration: 0,
-          placement: "topRightt",
+          placement: "topRight",
         });
       }
       if (
