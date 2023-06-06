@@ -74,7 +74,6 @@ export const Inventory = () => {
         notificationApi.warning({
           message: "库存过低",
           description: `${inventory.product_name} 库存过低`,
-          duration: 0,
           placement: "topRight",
         });
       }
@@ -85,7 +84,6 @@ export const Inventory = () => {
         notificationApi.warning({
           message: "库存过高",
           description: `${inventory.product_name} 库存过高`,
-          duration: 0,
           placement: "topRight",
         });
       }
