@@ -82,8 +82,8 @@ export const Inventory = () => {
         inventory.max_quantity - inventory.quantity <
         inventory.max_quantity / 10
       ) {
-        notificationApi.open({
-          message: "warning",
+        notificationApi.warning({
+          message: "库存过高",
           description: `${inventory.product_name} 库存过高`,
           duration: 0,
           placement: "topRight",
