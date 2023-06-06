@@ -67,7 +67,7 @@ export const apiSlice = createApi({
         method: "POST",
         body: { name: name, supplier_name: supplier_name },
       }),
-      invalidatesTags: ["Product"],
+      invalidatesTags: ["Product", "Inventory"],
     }),
     addSupplier: builder.mutation({
       query: ({ name, phone, location }) => ({

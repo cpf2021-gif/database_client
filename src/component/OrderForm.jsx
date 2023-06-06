@@ -12,7 +12,7 @@ export const OrderForm = ({ username }) => {
     useAddInboundMutation();
   const [addOutbound, { isLoading: isAddOutboundLoading }] =
     useAddOutboundMutation();
-
+   
   const { data: products = {}, isSuccess } = useGetProductsQuery();
   const [messageApi, contextHolder] = message.useMessage();
   const { Option } = Select;
@@ -61,10 +61,24 @@ export const OrderForm = ({ username }) => {
     }
     try {
       if (values.type === "inbound") {
-        const resp = await addInbound({user_name: values.user_name, quantity: +values.quantity, product_name: values.product}).unwrap();
-        successM(resp.message);
+        const resp = await addInbound({
+          user_name: values.user_name,
+          quantity: +values.quantity,
+          product_name: values.product,
+        }).unwrap();
+        // 提示信息
+        if (resp.message !== "success") {
+          warningM(resp.message);
+        } else {
+          successM(resp.message);
+        }
       } else {
-        const resp = await addOutbound({user_name: values.user_name, quantity: +values.quantity, product_name: values.product}).unwrap();
+        // 提示信息
+        const resp = await addOutbound({
+          user_name: values.user_name,
+          quantity: +values.quantity,
+          product_name: values.product,
+        }).unwrap();
         if (resp.message !== "success") {
           warningM(resp.message);
         } else {
@@ -119,20 +133,20 @@ export const OrderForm = ({ username }) => {
         </Form.Item>
 
         <Form.Item
-            label="操作人"
-            name="user_name"
-            rules={[
-                {
-                    required: true,
-                    message: "请输入操作人",
-                },
-            ]}
+          label="操作人"
+          name="user_name"
+          rules={[
+            {
+              required: true,
+              message: "请输入操作人",
+            },
+          ]}
         >
-            <Select>
-                <Option key={username} value={username}>
-                    {username}
-                </Option>
-            </Select>
+          <Select>
+            <Option key={username} value={username}>
+              {username}
+            </Option>
+          </Select>
         </Form.Item>
 
         <Form.Item
@@ -164,7 +178,7 @@ export const OrderForm = ({ username }) => {
             },
             {
               validator: vaildateNumber,
-            }
+            },
           ]}
         >
           <Input />

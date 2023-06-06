@@ -11,11 +11,12 @@ import {
   Typography,
   Button,
   message,
-  Tag
+  Tag,
+  notification,
 } from "antd";
-import { NumberOutlined, SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 const EditableCell = ({
   editing,
@@ -64,6 +65,32 @@ export const Inventory = () => {
 
   // 提示信息
   const [messageApi, contextHolder] = message.useMessage();
+  // 警告提示
+  const [notificationApi, contextHolder2] = notification.useNotification();
+  // 过高过低提示
+  const onpeNotification = (inventories) => {
+    inventories.map((inventory) => {
+      if (inventory.quantity < inventory.min_quantity) {
+        notificationApi.open({
+          message: "库存过低",
+          description: `${inventory.product_name} 库存过低`,
+          duration: 0,
+          placement: "TopRight",
+        });
+      }
+      if (
+        inventory.max_quantity - inventory.quantity <
+        inventory.max_quantity / 10
+      ) {
+        notificationApi.open({
+          message: "库存过高",
+          description: `${inventory.product_name} 库存过高`,
+          duration: 0,
+          placement: "TopRight",
+        });
+      }
+    });
+  };
   // 成功提示
   const successM = (content) => {
     messageApi.open({
@@ -270,9 +297,11 @@ export const Inventory = () => {
         <>
           {record.tag === "normal" ? (
             <Tag color="green">normal</Tag>
+          ) : record.tag == "low" ? (
+            <Tag color="red">low</Tag>
           ) : (
-            <Tag color="red">low</Tag>)
-          }
+            <Tag color="orange">high</Tag>
+          )}
         </>
       ),
     },
@@ -362,7 +391,16 @@ export const Inventory = () => {
     inventoriesdata = inventories.data.map((inventory) => {
       let nivt = { ...inventory };
       nivt.key = inventory.id;
-      nivt.tag = inventory.quantity > inventory.min_quantity ? "normal" : "low";
+      nivt.tag = "normal";
+      if (inventory.quantity < inventory.min_quantity) {
+        nivt.tag = "low";
+      }
+      if (
+        inventory.max_quantity - inventory.quantity <
+        inventory.max_quantity / 10
+      ) {
+        nivt.tag = "high";
+      }
       return nivt;
     });
     content = (
@@ -387,9 +425,16 @@ export const Inventory = () => {
     content = <div>{error}</div>;
   }
 
+    useEffect(() => {
+      if (isSuccess) {
+        onpeNotification(inventoriesdata);
+      }
+    }, [inventoriesdata]);
+
   return (
     <div>
       <h2>库存</h2>
+      {contextHolder2}
       {contextHolder}
       {content}
     </div>
