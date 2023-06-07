@@ -1,18 +1,18 @@
 import { Button, Form, Input, message, Select, Divider } from "antd";
 import {
   useAddProductMutation,
-  useGetSuppliersQuery,
   useAddSupplierMutation,
+  useAddSellerMutation,
 } from "../../feature/api/apiSlice";
 
 export const AddProduct = () => {
   const [form1] = Form.useForm();
   const [form2] = Form.useForm();
   const [addProduct, { isLoading }] = useAddProductMutation();
-  const { data: suppliers = {}, isSuccess } = useGetSuppliersQuery();
-  const [addSupplier, { isLoading: isSupplierLoading }] =
-    useAddSupplierMutation();
+  const [addSupplier, { isLoading: isLoading1 }] = useAddSupplierMutation();
+  const [addSeller, { isLoading: isLoading2 }] = useAddSellerMutation();
   const [messageApi, contextHolder] = message.useMessage();
+
   const { Option } = Select;
 
   // 成功提示
@@ -33,6 +33,29 @@ export const AddProduct = () => {
     });
   };
 
+  const onCompanyFinish = async (values) => {
+    try {
+      if (values.type === "supplier") {
+        const resp = await addSupplier({
+          name: values.name,
+          phone: values.phone,
+          location: values.location,
+        }).unwrap();
+        successM(resp.message);
+      } else {
+        const resp = await addSeller({
+          name: values.name,
+          phone: values.phone,
+          location: values.location,
+        }).unwrap();
+        successM(resp.message);
+      }
+    } catch (err) {
+      errorM(err.data.error);
+    }
+    form2.resetFields();
+  };
+
   const onProductFinish = async (values) => {
     try {
       const resp = await addProduct(values).unwrap();
@@ -43,6 +66,29 @@ export const AddProduct = () => {
     form1.resetFields();
   };
 
+  //
+  const vaildateProductName = (_, value) => {
+    if (!value || value.length < 3 || value.length > 30) {
+      return Promise.reject(new Error("长度为3-30位"));
+    }
+    return Promise.resolve();
+  };
+
+  const vaildateCompanyName = (_, value) => {
+    if (!value || value.length < 3 || value.length > 40) {
+      return Promise.reject(new Error("长度为3-40位"));
+    }
+    return Promise.resolve();
+  };
+
+  const vaildateLocation = (_, value) => {
+    if (!value || value.length < 4 || value.length > 20) {
+      return Promise.reject(new Error("长度为4-20位"));
+    }
+    return Promise.resolve();
+  };
+
+  // 电话号码校验
   const vaildatePhone = (_, value) => {
     // 只能是数字
     if (!value || !/^[0-9]*$/.test(value)) {
@@ -54,26 +100,7 @@ export const AddProduct = () => {
     return Promise.resolve();
   };
 
-  const vaildateString = (_, value) => {
-    if (!value || value.length < 1 || value.length > 20) {
-      return Promise.reject(new Error("长度为1-20位"));
-    }
-    return Promise.resolve();
-  };
-
-  const onSupplierFinish = async (values) => {
-    try {
-      const resp = await addSupplier(values).unwrap();
-      successM(resp.message);
-    } catch (err) {
-      errorM(err.data.error);
-    }
-    form2.resetFields();
-  };
-
-  return !isSuccess ? (
-    <div>loading</div>
-  ) : (
+  return (
     <div>
       <h2>添加产品</h2>
       {contextHolder}
@@ -101,30 +128,11 @@ export const AddProduct = () => {
               message: "请输入商品名称!",
             },
             {
-              validator: vaildateString,
+              validator: vaildateProductName,
             },
           ]}
         >
           <Input />
-        </Form.Item>
-
-        <Form.Item
-          label="供应商名称"
-          name="supplier_name"
-          rules={[
-            {
-              required: true,
-              message: "请输入供应商名称!",
-            },
-          ]}
-        >
-          <Select>
-            {suppliers.data.map((supplier) => (
-              <Option key={supplier.name} value={supplier.name}>
-                {supplier.name}
-              </Option>
-            ))}
-          </Select>
         </Form.Item>
 
         <Form.Item
@@ -139,10 +147,10 @@ export const AddProduct = () => {
         </Form.Item>
       </Form>
       <Divider />
-      <h2>添加供应商</h2>
+      <h2>添加供应商/销售商</h2>
       <Form
+        name="company"
         form={form2}
-        name="supplier"
         labelCol={{
           span: 8,
         }}
@@ -152,19 +160,35 @@ export const AddProduct = () => {
         style={{
           maxWidth: 600,
         }}
-        onFinish={onSupplierFinish}
+        onFinish={onCompanyFinish}
         autoComplete="off"
       >
         <Form.Item
-          label="供应商名称"
+          label="公司类型"
+          name="type"
+          rules={[
+            {
+              required: true,
+              message: "请选择公司类型!",
+            },
+          ]}
+        >
+          <Select placeholder="请选择公司类型">
+            <Option value="supplier">供应商</Option>
+            <Option value="seller">销售商</Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          label="公司名称"
           name="name"
           rules={[
             {
               required: true,
-              message: "请输入供应商名称!",
+              message: "请输入公司名称!",
             },
             {
-              validator: vaildateString,
+              validator: vaildateCompanyName,
             },
           ]}
         >
@@ -172,12 +196,28 @@ export const AddProduct = () => {
         </Form.Item>
 
         <Form.Item
-          label="供应商电话"
+          label="公司地区"
+          name="location"
+          rules={[
+            {
+              required: true,
+              message: "请输入公司地区!",
+            },
+            {
+              validator: vaildateLocation,
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          label="联系方式"
           name="phone"
           rules={[
             {
               required: true,
-              message: "请输入供应商电话!",
+              message: "请输入联系方式!",
             },
             {
               validator: vaildatePhone,
@@ -188,28 +228,16 @@ export const AddProduct = () => {
         </Form.Item>
 
         <Form.Item
-          label="供应商地址"
-          name="location"
-          rules={[
-            {
-              required: true,
-              message: "请输入供应商地址!",
-            },
-            {
-              validator: vaildateString,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
           wrapperCol={{
-            offset: 8,
             span: 16,
+            offset: 8,
           }}
         >
-          <Button type="primary" htmlType="submit" disabled={isSupplierLoading}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={isLoading1 || isLoading2}
+          >
             Submit
           </Button>
         </Form.Item>

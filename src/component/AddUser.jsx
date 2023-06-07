@@ -173,7 +173,6 @@ export const AddUser = ({ user, setuser }) => {
           ]}
         >
           <Select>
-            <Option value="admin">管理员</Option>
             <Option value="guest">普通用户</Option>
             <Option value="editor">操作人员</Option>
             <Option value="analyst">分析员</Option>

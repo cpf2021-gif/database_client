@@ -72,7 +72,7 @@ const OrderColumns = [
 // 年月校验
 const vaildateMonth = (_, value) => {
   // 'yyyy-MM'格式
-  if (!value || !/^\d{4}-\d{2}$/.test(value)) {
+  if (value && !/^\d{4}-\d{2}$/.test(value)) {
     return Promise.reject(new Error("年月格式为yyyy-MM"));
   }
   return Promise.resolve();
@@ -110,7 +110,13 @@ export const ExportForm = () => {
         const data = res.data;
         // 文件名包含时间 "yyyy-MM"
         const name = "入库数据" + (values.month ? values.month : formateDate(Date.now()).substring(0, 7));
-        handleExport({ columns: OrderColumns, data, name: name });
+        // inbound OrderColumns
+        const inboundColumns = [...OrderColumns, {
+          header: "供应商",
+          key: "supplier_name",
+          width: 20,
+        }];
+        handleExport({ columns: inboundColumns, data, name: name });
       } else {
         const resp = await fetch("http://localhost:8080/outbounds/export", {
           method: "PUT",
@@ -126,7 +132,13 @@ export const ExportForm = () => {
         const data = res.data;
         // 文件名包含时间 "yyyy-MM"
         const name = "出库数据" + (values.month ? values.month : formateDate(Date.now()).substring(0, 7));
-        handleExport({ columns: OrderColumns, data, name: name });
+        // outbound OrderColumns
+        const outboundColumns = [...OrderColumns, {
+          header: "销售商",
+          key: "seller_name",
+          width: 20,
+        }];
+        handleExport({ columns: outboundColumns, data, name: name });
       }
     } catch (err) {
       errorM("没有数据");
@@ -211,10 +223,6 @@ export const ExportForm = () => {
           label="年月"
           name="month"
           rules={[
-            {
-              required: true,
-              message: "请输入年月!",
-            },
             {
               validator: vaildateMonth,
             }

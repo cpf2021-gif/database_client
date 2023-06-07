@@ -142,6 +142,12 @@ export const Inbound = () => {
       ...getColumnSearchProps("product_name"),
     },
     {
+      title: "供应商名称",
+      dataIndex: "supplier_name",
+      key: "supplier_name",
+      ...getColumnSearchProps("supplier_name"),
+    },
+    {
       title: "数量",
       dataIndex: "quantity",
       key: "quantity",

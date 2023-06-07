@@ -4,17 +4,16 @@ import { Button, Input, Space, Table } from "antd";
 import { useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
 
-
 export const Outbound = () => {
-    const {
-        data: outbounds = {},
-        isLoading,
-        isSuccess,
-        isError,
-        error,
-    } = useGetOutboundsQuery();
+  const {
+    data: outbounds = {},
+    isLoading,
+    isSuccess,
+    isError,
+    error,
+  } = useGetOutboundsQuery();
 
-    const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -129,65 +128,66 @@ export const Outbound = () => {
       ),
   });
 
-    const columns = [
-        {
-            title: "序号",
-            dataIndex: "id",
-            key: "id",
-            sorter: (a, b) => a.id - b.id,
-        },
-        {
-            title: "产品名称",
-            dataIndex: "product_name",
-            key: "product_name",
-            ...getColumnSearchProps("product_name"),
-        },
-        {
-            title: "数量",
-            dataIndex: "quantity",
-            key: "quantity",
-        },
-        {
-            title: "操作人",
-            dataIndex: "user_name",
-            key: "user_name",
-            ...getColumnSearchProps("user_name"),
-        }, 
-        {
-            title: "创建时间",
-            dataIndex: "create_time",
-            key: "create_time",
-            ...getColumnSearchProps("create_time"),
-        }
-    ]
+  const columns = [
+    {
+      title: "序号",
+      dataIndex: "id",
+      key: "id",
+      sorter: (a, b) => a.id - b.id,
+    },
+    {
+      title: "产品名称",
+      dataIndex: "product_name",
+      key: "product_name",
+      ...getColumnSearchProps("product_name"),
+    },
+    {
+      title: "销售商",
+      dataIndex: "seller_name",
+      key: "seller_name",
+      ...getColumnSearchProps("seller_name"),
+    },
+    {
+      title: "数量",
+      dataIndex: "quantity",
+      key: "quantity",
+    },
+    {
+      title: "操作人",
+      dataIndex: "user_name",
+      key: "user_name",
+      ...getColumnSearchProps("user_name"),
+    },
+    {
+      title: "创建时间",
+      dataIndex: "create_time",
+      key: "create_time",
+      ...getColumnSearchProps("create_time"),
+    },
+  ];
 
-    let content;
-    let outboundsdata;
+  let content;
+  let outboundsdata;
 
-    if (isLoading) {
-        content = <div>loading...</div>;
-    } else if (isSuccess) {
-        outboundsdata = outbounds.data ? outbounds.data.map((outbound) => {
-            let nuer = { ...outbound };
-            nuer.key = outbound.id;
-            return nuer;
-        }
-        ) : [];
-        content = (
-            <Table
-                bordered
-                dataSource={outboundsdata}
-                columns={columns}
-            />
-        );
-    } else if (isError) {
-        content = <div>{error}</div>;
-    }
+  if (isLoading) {
+    content = <div>loading...</div>;
+  } else if (isSuccess) {
+    outboundsdata = outbounds.data
+      ? outbounds.data.map((outbound) => {
+          let nuer = { ...outbound };
+          nuer.key = outbound.id;
+          return nuer;
+        })
+      : [];
+    content = <Table bordered dataSource={outboundsdata} columns={columns} />;
+  } else if (isError) {
+    content = <div>{error}</div>;
+  }
 
-    return (
-        <div>
-            <h2>出库信息</h2>
-            {content}
-        </div>
-    );
-}
+  return (
+    <div>
+      <h2>出库信息</h2>
+      {content}
+    </div>
+  );
+};

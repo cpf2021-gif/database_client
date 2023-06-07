@@ -22,6 +22,7 @@ import { AddProduct } from "../component/AddProduct";
 import { DataInfo } from "../component/DataInfo";
 import { OrderForm } from "../component/OrderForm";
 import { ExportForm } from "../component/ExportForm";
+import { Seller } from "../component/Seller";
 
 import data from "../../src/data";
 
@@ -45,7 +46,8 @@ const items = [
   getItem("产品管理", "2", <TableOutlined />, [
     getItem("产品信息", "2-1"),
     getItem("供应商信息", "2-2"),
-    getItem("新增内容", "2-3"),
+    getItem("销售商信息", "2-3"),
+    getItem("新增内容", "2-4"),
   ]),
   getItem("库存管理", "3", <ReconciliationOutlined />, [
     getItem("库存信息", "3-1"),
@@ -136,7 +138,7 @@ export const Home = ({ user, setuser }) => {
                 setMsg(<User />);
                 break;
               case "1-3":
-                setMsg(<AddUser user={user} setuser={setuser}/>);
+                setMsg(<AddUser user={user} setuser={setuser} />);
                 break;
               case "2-1":
                 setMsg(<Product />);
@@ -145,6 +147,9 @@ export const Home = ({ user, setuser }) => {
                 setMsg(<Supplier />);
                 break;
               case "2-3":
+                setMsg(<Seller />);
+                break;
+              case "2-4":
                 setMsg(<AddProduct />);
                 break;
               case "3-1":

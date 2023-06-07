@@ -1,9 +1,11 @@
-import { Button, Form, Input, message, Select } from "antd";
+import { Button, Form, Input, message, Select, Cascader } from "antd";
 
 import {
   useAddInboundMutation,
   useAddOutboundMutation,
   useGetProductsQuery,
+  useGetSellersQuery,
+  useGetSuppliersQuery,
 } from "../../feature/api/apiSlice";
 
 export const OrderForm = ({ username }) => {
@@ -14,6 +16,8 @@ export const OrderForm = ({ username }) => {
     useAddOutboundMutation();
    
   const { data: products = {}, isSuccess } = useGetProductsQuery();
+  const { data: suppliers = {}, isSuccess: isSuccess1 } = useGetSuppliersQuery();
+  const { data: sellers = {}, isSuccess: isSuccess2 } = useGetSellersQuery();
   const [messageApi, contextHolder] = message.useMessage();
   const { Option } = Select;
 
@@ -59,12 +63,15 @@ export const OrderForm = ({ username }) => {
     if (isAddInboundLoading || isAddOutboundLoading) {
       return;
     }
+    const type = values.type[0];
+    const company = values.type[1];
     try {
-      if (values.type === "inbound") {
+      if (type === "inbound") {
         const resp = await addInbound({
           user_name: values.user_name,
           quantity: +values.quantity,
           product_name: values.product,
+          supplier_name: company,
         }).unwrap();
         // 提示信息
         if (resp.message !== "success") {
@@ -78,6 +85,7 @@ export const OrderForm = ({ username }) => {
           user_name: values.user_name,
           quantity: +values.quantity,
           product_name: values.product,
+          seller_name: company,
         }).unwrap();
         if (resp.message !== "success") {
           warningM(resp.message);
@@ -91,7 +99,31 @@ export const OrderForm = ({ username }) => {
     form.resetFields();
   };
 
-  return !isSuccess ? (
+  let options;
+
+  if (isSuccess && isSuccess1 && isSuccess2) {
+    options = [
+      {
+        value: "inbound",
+        label: "入库",
+        children: suppliers.data.map((supplier) => ({
+          value: supplier.name,
+          label: supplier.name,
+        })),
+      },
+      {
+        value: "outbound",
+        label: "出库",
+        children: sellers.data.map((seller) => ({
+          value: seller.name,
+          label: seller.name,
+        })),
+      }
+    ]
+  }
+
+
+  return !(isSuccess && isSuccess1 && isSuccess2) ? (
     <div>loading...</div>
   ) : (
     <div>
@@ -113,7 +145,7 @@ export const OrderForm = ({ username }) => {
         autoComplete="off"
       >
         <Form.Item
-          label="订单类型"
+          label="订单对象"
           name="type"
           rules={[
             {
@@ -122,14 +154,7 @@ export const OrderForm = ({ username }) => {
             },
           ]}
         >
-          <Select>
-            <Option key="inbound" value="inbound">
-              入库
-            </Option>
-            <Option key="outbound" value="outbound">
-              出库
-            </Option>
-          </Select>
+          <Cascader options={options} /> 
         </Form.Item>
 
         <Form.Item

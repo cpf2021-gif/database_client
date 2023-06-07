@@ -1,7 +1,6 @@
 import {
   useGetProductsQuery,
   useEditProductMutation,
-  useDeleteProductMutation,
 } from "../../feature/api/apiSlice";
 
 import {
@@ -106,7 +105,6 @@ export const Product = () => {
     try {
       const resp = await editProduct({
         id: record.id,
-        supplier_name: record.supplier_name,
         name: record.name,
       }).unwrap();
       successM(resp.message);
@@ -244,18 +242,6 @@ export const Product = () => {
       ),
   });
 
-  // 删除数据
-  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
-  const handleDelete = async (id) => {
-    if (isDeleting) return;
-    try {
-      const resp = await deleteProduct(id).unwrap();
-      successM(resp.message);
-    } catch (err) {
-      errorM(err.data.error);
-    }
-  };
-
   let content;
   let productsdata;
 
@@ -272,12 +258,6 @@ export const Product = () => {
       dataIndex: "name",
       key: "name",
       ...getColumnSearchProps("name"),
-      editable: true,
-    },
-    {
-      title: "供应商",
-      dataIndex: "supplier_name",
-      key: "supplier_name",
       editable: true,
     },
     {
@@ -323,12 +303,6 @@ export const Product = () => {
             >
               Edit
             </Typography.Link>
-            <Popconfirm
-              title="Sure to delete?"
-              onConfirm={() => handleDelete(record.id)}
-            >
-              <a>Delete</a>
-            </Popconfirm>
           </Space>
         );
       },

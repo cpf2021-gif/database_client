@@ -1,6 +1,6 @@
 import {
-  useGetInventoriesQuery,
-  useEditInventoryMutation,
+  useGetSellersQuery,
+  useEditSellerMutation
 } from "../../feature/api/apiSlice";
 import {
   Table,
@@ -10,13 +10,12 @@ import {
   Space,
   Typography,
   Button,
-  message,
-  Tag,
-  notification,
+  message
 } from "antd";
+
 import { SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 
 const EditableCell = ({
   editing,
@@ -53,45 +52,10 @@ const EditableCell = ({
   );
 };
 
-export const Inventory = () => {
-  // 获取数据
-  const {
-    data: inventories = {},
-    isLoading,
-    isSuccess,
-    isError,
-    error,
-  } = useGetInventoriesQuery();
-
-  // 是否执行警告提示
-  const isFirstRun = useRef(true);
-
+export const Seller = () => {
   // 提示信息
   const [messageApi, contextHolder] = message.useMessage();
-  // 警告提示
-  const [notificationApi, contextHolder2] = notification.useNotification();
-  // 过高过低提示
-  const onpeNotification = (inventories) => {
-    inventories.map((inventory) => {
-      if (inventory.quantity < inventory.min_quantity) {
-        notificationApi.warning({
-          message: "库存过低",
-          description: `${inventory.product_name} 库存过低`,
-          placement: "topRight",
-        });
-      }
-      if (
-        inventory.max_quantity - inventory.quantity <
-        inventory.max_quantity / 10
-      ) {
-        notificationApi.warning({
-          message: "库存过高",
-          description: `${inventory.product_name} 库存过高`,
-          placement: "topRight",
-        });
-      }
-    });
-  };
+
   // 成功提示
   const successM = (content) => {
     messageApi.open({
@@ -100,6 +64,7 @@ export const Inventory = () => {
       duration: 2,
     });
   };
+
   // 失败提示
   const errorM = (content) => {
     messageApi.open({
@@ -109,18 +74,26 @@ export const Inventory = () => {
     });
   };
 
-  // 编辑
-  const [editInventory, { isLoading: isEditing }] = useEditInventoryMutation();
+  // 获取用户列表
+  const {
+    data: sellers = {},
+    isLoading,
+    isSuccess,
+    isError,
+    error,
+  } = useGetSellersQuery();
+
+  // 编辑用户
+  const [editSeller, { isLoading: isEditing }] = useEditSellerMutation();
 
   const [form] = Form.useForm();
   const [editingKey, setEditingKey] = useState("");
-  const isEdit = (record) => record.product_name === editingKey;
+  const isEdit = (record) => record.name === editingKey;
   const edit = (record) => {
     form.setFieldsValue({
       ...record,
     });
-    console.log(record.product_name);
-    setEditingKey(record.product_name);
+    setEditingKey(record.name);
   };
 
   const cancel = () => {
@@ -128,27 +101,26 @@ export const Inventory = () => {
   };
 
   const handleEdit = async (record) => {
-    console.log(record);
     if (isEditing) return;
     try {
-      const resp = await editInventory({
-        id: record.id,
-        max_quantity: +record.max_quantity,
-        min_quantity: +record.min_quantity,
+      const resp = await editSeller({
+        name: record.name,
+        phone: record.phone,
+        location: record.location,
       }).unwrap();
       successM(resp.message);
     } catch (errInfo) {
-      errorM(errInfo.data.error);
+      errorM(errInfo.data.error)
     }
   };
 
-  const save = async (id) => {
+  const save = async (name) => {
     try {
       const row = await form.validateFields();
-      handleEdit({ ...row, id });
+      handleEdit({ ...row, name });
       setEditingKey("");
     } catch (errInfo) {
-      errorM("编辑失败");
+      errorM("编辑失败")
     }
   };
 
@@ -156,15 +128,18 @@ export const Inventory = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
+
   const handleReset = (clearFilters) => {
     clearFilters();
     setSearchText("");
   };
+
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -217,9 +192,7 @@ export const Inventory = () => {
             type="link"
             size="small"
             onClick={() => {
-              confirm({
-                closeDropdown: false,
-              });
+              confirm({ closeDropdown: false });
               setSearchText(selectedKeys[0]);
               setSearchedColumn(dataIndex);
             }}
@@ -233,20 +206,22 @@ export const Inventory = () => {
               close();
             }}
           >
-            close
+            Close
           </Button>
         </Space>
       </div>
     ),
     filterIcon: (filtered) => (
-      <SearchOutlined
-        style={{
-          color: filtered ? "#1677ff" : undefined,
-        }}
-      />
+      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
     ),
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilter: (value, record) => {
+      return record[dataIndex]
+        ? record[dataIndex]
+            .toString()
+            .toLowerCase()
+            .includes(value.toLowerCase())
+        : "";
+    },
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -268,67 +243,26 @@ export const Inventory = () => {
       ),
   });
 
+  // 表格消息
   const columns = [
     {
-      title: "序号",
-      dataIndex: "id",
-      key: "id",
+      title: "销售商名称",
+      dataIndex: "name",
+      key: "name",
       editable: false,
-      sorter: (a, b) => a.id - b.id,
+      ...getColumnSearchProps("name"),
     },
     {
-      title: "产品",
-      dataIndex: "product_name",
-      key: "product_name",
-      editable: false,
-      ...getColumnSearchProps("product_name"),
-    },
-    {
-      title: "数量",
-      dataIndex: "quantity",
-      key: "quantity",
-      editable: false,
-    },
-    {
-      title: "状态",
-      dataIndex: "tag",
-      key: "tag",
-      editable: false,
-      render: (_, record) => (
-        <>
-          {record.tag === "normal" ? (
-            <Tag color="green">normal</Tag>
-          ) : record.tag == "low" ? (
-            <Tag color="red">low</Tag>
-          ) : (
-            <Tag color="orange">high</Tag>
-          )}
-        </>
-      ),
-    },
-    {
-      title: "最大库存",
-      dataIndex: "max_quantity",
-      key: "max_quantity",
+      title: "联系方式",
+      dataIndex: "phone",
+      key: "phone",
       editable: true,
     },
     {
-      title: "最小库存",
-      dataIndex: "min_quantity",
-      key: "min_quantity",
+      title: "地区",
+      dataIndex: "location",
+      key: "location",
       editable: true,
-    },
-    {
-      title: "创建时间",
-      dataIndex: "create_time",
-      key: "create_time",
-      editable: false,
-    },
-    {
-      title: "修改时间",
-      dataIndex: "update_time",
-      key: "update_time",
-      editable: false,
     },
     {
       title: "操作",
@@ -340,7 +274,7 @@ export const Inventory = () => {
           return (
             <span>
               <Typography.Link
-                onClick={() => save(record.id)}
+                onClick={() => save(record.name)}
                 style={{
                   marginRight: 8,
                 }}
@@ -384,25 +318,14 @@ export const Inventory = () => {
   });
 
   let content;
-  let inventoriesdata;
-
+  let sellersdata;
   if (isLoading) {
     content = <div>loading...</div>;
   } else if (isSuccess) {
-    inventoriesdata = inventories.data.map((inventory) => {
-      let nivt = { ...inventory };
-      nivt.key = inventory.id;
-      nivt.tag = "normal";
-      if (inventory.quantity < inventory.min_quantity) {
-        nivt.tag = "low";
-      }
-      if (
-        inventory.max_quantity - inventory.quantity <
-        inventory.max_quantity / 10
-      ) {
-        nivt.tag = "high";
-      }
-      return nivt;
+    sellersdata = sellers.data.map((user) => {
+      let nuer = { ...user };
+      nuer.key = user.name;
+      return nuer;
     });
     content = (
       <Form form={form} component={false}>
@@ -413,7 +336,7 @@ export const Inventory = () => {
             },
           }}
           bordered
-          dataSource={inventoriesdata}
+          dataSource={sellersdata}
           columns={mergedColumns}
           rowClassName="editable-row"
           pagination={{
@@ -423,20 +346,12 @@ export const Inventory = () => {
       </Form>
     );
   } else if (isError) {
-    content = <div>{error}</div>;
+    content = <div>{error.message}</div>;
   }
-
-    useEffect(() => {
-      if (isSuccess && isFirstRun.current) {
-        onpeNotification(inventoriesdata);
-        isFirstRun.current = false;
-      }
-    }, [inventoriesdata]);
 
   return (
     <div>
-      <h2>库存</h2>
-      {contextHolder2}
+      <h2>销售商数据</h2>
       {contextHolder}
       {content}
     </div>
