@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:8080" }),
-  tagTypes: ["User", "Product", "Supplier", "Inventory", "Inbound", "Outbound"],
+  tagTypes: ["User", "Product", "Supplier", "Inventory", "Inbound", "Outbound", "seller"],
   endpoints: (builder) => ({
     // 数据
     getDashboard: builder.query({
@@ -52,7 +52,7 @@ export const apiSlice = createApi({
       invalidatesTags: ["User"],
     }),
 
-    // 产品和供应商
+    // 产品,供应商,销售商
     getProducts: builder.query({
       query: () => "/products",
       providesTags: ["Product"],
@@ -61,11 +61,15 @@ export const apiSlice = createApi({
       query: () => "/suppliers",
       providesTags: ["Supplier"],
     }),
+    getSellers: builder.query({
+      query: () => "/sellers",
+      providesTags: ["seller"],
+    }),
     addProduct: builder.mutation({
-      query: ({ name, supplier_name }) => ({
+      query: ({ name }) => ({
         url: "/products",
         method: "POST",
-        body: { name: name, supplier_name: supplier_name },
+        body: { name: name },
       }),
       invalidatesTags: ["Product", "Inventory"],
     }),
@@ -77,21 +81,47 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["Supplier"],
     }),
+    addSeller: builder.mutation({
+      query: ({ name, phone, location }) => ({
+        url: "/sellers",
+        method: "POST",
+        body: { name: name, phone: phone, location: location },
+      }),
+      invalidatesTags: ["seller"],
+    }),
+    addSeller: builder.mutation({
+      query: ({ name, phone, location }) => ({
+        url: "/sellers",
+        method: "POST",
+        body: { name: name, phone: phone, location: location },
+      }),
+      invalidatesTags: ["seller"],
+    }),
     editProduct: builder.mutation({
-      query: ({ id, supplier_name, name }) => ({
+      query: ({ id, name }) => ({
         url: `/products/${id}`,
         method: "PATCH",
-        body: { supplier_name: supplier_name, name: name },
+        body: { name: name },
       }),
       invalidatesTags: ["Product"],
     }),
-    deleteProduct: builder.mutation({
-      query: (id) => ({
-        url: `/products/${id}`,
-        method: "DELETE",
+    editSupplier: builder.mutation({
+      query: ({ name, phone, location }) => ({
+        url: `/suppliers/${name}`,
+        method: "PATCH",
+        body: { phone: phone, location: location },
       }),
-      invalidatesTags: ["Product"],
+      invalidatesTags: ["Supplier", "Inbound"],
     }),
+    editSeller: builder.mutation({
+      query: ({ name, phone, location }) => ({
+        url: `/sellers/${name}`,
+        method: "PATCH",
+        body: { phone: phone, location: location },
+      }),
+      invalidatesTags: ["seller", "Outbound"],
+    }),
+
     // 订单和库存
     getInventories: builder.query({
       query: () => "/inventories",
@@ -114,18 +144,18 @@ export const apiSlice = createApi({
       invalidatesTags: ["Inventory"],
     }),
     addInbound: builder.mutation({
-      query: ({ product_name, quantity, user_name }) => ({
+      query: ({ product_name, quantity, user_name, supplier_name}) => ({
         url: "/inbounds",
         method: "POST",
-        body: { product_name: product_name, quantity: quantity, user_name: user_name },
+        body: { product_name: product_name, quantity: quantity, user_name: user_name, supplier_name: supplier_name },
       }),
       invalidatesTags: ["Inbound", "Inventory"],
     }),
     addOutbound: builder.mutation({
-      query: ({ product_name, quantity, user_name }) => ({
+      query: ({ product_name, quantity, user_name, seller_name }) => ({
         url: "/outbounds",
         method: "POST",
-        body: { product_name: product_name, quantity: quantity, user_name: user_name },
+        body: { product_name: product_name, quantity: quantity, user_name: user_name, seller_name: seller_name },
       }),
       invalidatesTags: ["Outbound", "Inventory"],
     }),
@@ -144,15 +174,18 @@ export const {
 
   useGetProductsQuery,
   useGetSuppliersQuery,
+  useGetSellersQuery,
   useAddProductMutation,
+  useAddSellerMutation,
   useAddSupplierMutation,
   useEditProductMutation,
-  useDeleteProductMutation,
+  useEditSellerMutation,
+  useEditSupplierMutation,
 
   useGetInventoriesQuery,
   useGetInboundsQuery,
-  useEditInventoryMutation,
   useGetOutboundsQuery,
+  useEditInventoryMutation,
   useAddInboundMutation,
   useAddOutboundMutation,
  } =
