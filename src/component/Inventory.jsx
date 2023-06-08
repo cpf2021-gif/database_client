@@ -294,6 +294,7 @@ export const Inventory = () => {
       dataIndex: "tag",
       key: "tag",
       editable: false,
+      ...getColumnSearchProps("tag"),
       render: (_, record) => (
         <>
           {record.tag === "normal" ? (
