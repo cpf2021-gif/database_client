@@ -53,7 +53,7 @@ export const DataInfo = () => {
           <Col span={12}>
             <Card bordered={true} hoverable={true}>
               <Statistic
-                title="产品数量"
+                title="产品种类"
                 value={data.productsnumber}
                 valueStyle={{
                   color: "#3f8600",
