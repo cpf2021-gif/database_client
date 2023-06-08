@@ -1,6 +1,6 @@
 import {
   useGetSellersQuery,
-  useEditSellerMutation
+  useEditSellerMutation,
 } from "../../feature/api/apiSlice";
 import {
   Table,
@@ -10,7 +10,7 @@ import {
   Space,
   Typography,
   Button,
-  message
+  message,
 } from "antd";
 
 import { SearchOutlined } from "@ant-design/icons";
@@ -110,7 +110,7 @@ export const Seller = () => {
       }).unwrap();
       successM(resp.message);
     } catch (errInfo) {
-      errorM(errInfo.data.error)
+      errorM(errInfo.data.error);
     }
   };
 
@@ -120,7 +120,7 @@ export const Seller = () => {
       handleEdit({ ...row, name });
       setEditingKey("");
     } catch (errInfo) {
-      errorM("编辑失败")
+      errorM("编辑失败");
     }
   };
 
