@@ -332,7 +332,7 @@ export const User = () => {
               Edit
             </Typography.Link>
             <Popconfirm  title="Sure to delete?" onConfirm={() => handleDelete(record.username)}>
-              <a>Delete</a>
+              <a disabled={editingKey !== ""}>Delete</a>
             </Popconfirm>
           </Space>
         );
